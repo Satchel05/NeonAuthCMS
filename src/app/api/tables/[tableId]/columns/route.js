@@ -30,7 +30,7 @@ export async function POST(request, {params}) {
 
 export async function GET(request, {params}) {
     try {
-        const { tableId } = params;
+        const { tableId } = await params;
 
         const result = await pool.query(
             `
