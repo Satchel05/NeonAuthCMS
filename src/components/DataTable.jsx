@@ -14,7 +14,7 @@ export function DataTable({ schema, rows, columns, tableId}) {
 
     return (
         
-        <div className="w-full max-w-4xl mx-auto p-8">  {/* Fixed width container */}
+        <div className="w-full max-w-8xl mx-auto p-8">  {/* Fixed width container */}
         <div className="rounded-md border">
             <Table>
             <TableHeader>
@@ -25,7 +25,7 @@ export function DataTable({ schema, rows, columns, tableId}) {
                     </TableHead>
                 ))}
                 <TableHead> 
-                    <NewColumnDialog tableId={tableId}/>
+                    <NewColumnDialog tableId={tableId} />
                 </TableHead>
                 </TableRow>
             </TableHeader>
