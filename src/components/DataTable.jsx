@@ -7,12 +7,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tag } from '@/components/Tag';
-import { NewRowDialog} from '@/components/NewRowDialog';
+import { NewRowDialog } from '@/components/NewRowDialog';
+import { NewColumnDialog } from '@/components/NewColumnDialog';
 
-export default function DataTable({ schema, rows, columns}) {
-
+export function DataTable({ schema, rows, columns, tableId}) {
 
     return (
+        
         <div className="w-full max-w-4xl mx-auto p-8">  {/* Fixed width container */}
         <div className="rounded-md border">
             <Table>
@@ -23,6 +24,9 @@ export default function DataTable({ schema, rows, columns}) {
                         {col.column_name}
                     </TableHead>
                 ))}
+                <TableHead> 
+                    <NewColumnDialog tableId={tableId}/>
+                </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -45,8 +49,7 @@ export default function DataTable({ schema, rows, columns}) {
                     </TableRow>
                 ))
                 )}
-
-                <NewRowDialog columns={columns}/>
+                <NewRowDialog columns={columns} tableId={tableId}/>
             </TableBody>
             </Table>
         </div>

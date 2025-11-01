@@ -1,7 +1,7 @@
 'use client';
 
 
-import * as React from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,31 +15,76 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Plus } from 'lucide-react';
+import { DynamicForm } from '@/components/DynamicForm';
 
-export function NewRowDialog({ columns }) {
+export function NewRowDialog({ columns, tableId }) {
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSucces = () => {
+      setIsOpen(false);
+      
+    }
 
     if(!columns || columns.length == 0) {
         return null;
     }
 
-
-    const [formValues, setFormValues] = React.useState(
-    Object.fromEntries(columns.map((col) => [col.key, '']))
+    const initialData = Object.fromEntries(
+      columns.map((col) => {
+        let defaultValue;
+        
+        switch (col.column_type) {
+          case 'tags':
+            defaultValue = [];  // Empty array for tags
+            break;
+          case 'text':
+            defaultValue = '';  // Empty string for text
+            break;
+          default:
+            defaultValue = '';
+        }
+        
+        return [col.column_name, defaultValue];
+      })
     );
 
+    const [formValues, setFormValues] = useState(initialData);
+
     function handleChange(key, value) {
-    setFormValues((prev) => ({ ...prev, [key]: value }));
+      setFormValues((prev) => ({ ...prev, [key]: value }));
     }
 
-    function handleSubmit(e) {
-    e.preventDefault();
-    console.log('New row:', formValues);
-    // TODO: send formValues to API, then close dialog, etc.
+    async function handleSubmit(e) {
+      e.preventDefault();
+      try {
+        const response = await fetch(`http://localhost:3000/api/tables/${tableId}/rows`, {
+          method: 'POST',                // POST request
+          headers: {
+            'Content-Type': 'application/json', // send JSON
+          },
+          body: JSON.stringify(formValues),    // convert JS object to JSON
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Created row:', result);
+        
+        handleSucces();
+
+        return result;
+      } catch (error) {
+        console.error('Failed to create row:', error);
+        throw error;
+      }
     }
 
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {/* ✅ Valid table structure */}
       <DialogTrigger asChild>
         <TableRow className="cursor-pointer hover:bg-gray-50 border-dashed transition">
@@ -74,34 +119,7 @@ export function NewRowDialog({ columns }) {
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 mt-4"
-        >
-          {columns.map((col) => (
-            <div key={col.id} className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                {col.column_name}
-              </label>
-              <Input
-                type={col.type}
-                placeholder={col.placeholder}
-                value={formValues[col.id]}
-                onChange={(e) => handleChange(col.key, e.target.value)}
-                className="bg-white/70 dark:bg-neutral-800/70 backdrop-blur-sm border border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          ))}
-
-          <DialogFooter className="mt-6 flex justify-end gap-2">
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-primary text-white hover:bg-primary/90">
-              Save Row
-            </Button>
-          </DialogFooter>
-        </form>
+        <DynamicForm columns={columns} formValues={formValues} handleChange={handleChange} onSubmit={handleSubmit}/>
       </DialogContent>
     </Dialog>
   );

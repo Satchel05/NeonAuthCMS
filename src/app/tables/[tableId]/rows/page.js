@@ -1,4 +1,4 @@
-import DataTable from '@/components/DataTable'
+import { DataTable } from '@/components/DataTable'
 
 export default async function rowsPage({ params }) {
 
@@ -11,5 +11,5 @@ export default async function rowsPage({ params }) {
 
     const [rowData, columnData] = await Promise.all([rowDataRes.json(), columnDataRes.json()]);
 
-    return <DataTable schema={rowData.schema} rows={rowData.rows} columns={columnData} />
+    return <DataTable schema={rowData.schema} rows={rowData.rows} columns={columnData} tableId={tableId}/>
 }
